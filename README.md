@@ -205,44 +205,6 @@ Abdul Wali Khan University Mardan
 
 ---
 
-## 📸 Screenshots
-
-Create a folder named:
-
-screenshots/
-
-And add:
-
-* login.png
-* home.png
-* profile.png
-* projects.png
-* contact.png
-
-Then GitHub will automatically display them.
-
-### Login Screen
-
-![Login Screen](screenshots/login.png)
-
-### Home Screen
-
-![Home Screen](screenshots/home.png)
-
-### Profile Screen
-
-![Profile Screen](screenshots/profile.png)
-
-### Projects Screen
-
-![Projects Screen](screenshots/projects.png)
-
-### Contact Screen
-
-![Contact Screen](screenshots/contact.png)
-
----
-
 ## 🚀 Installation & Setup
 
 ### Clone Repository
