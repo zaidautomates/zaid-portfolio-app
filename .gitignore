@@ -1,0 +1,115 @@
+# Miscellaneous
+
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+
+.vscode/
+
+# Flutter / Dart / Pub
+
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Flutter documentation
+
+**/doc/api/
+
+# Flutter iOS build
+
+**/ios/Flutter/.last_build_id
+
+# Android build outputs
+
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Android local SDK configuration
+
+android/local.properties
+
+# Android Gradle cache
+
+android/.gradle/
+
+# Generated files
+
+generated_plugin_registrant.dart
+
+# Symbolication
+
+app.*.symbols
+
+# Obfuscation
+
+app.*.map.json
+
+# Environment files
+
+.env
+.env.*
+.env.local
+
+# API Keys / Secrets
+
+apikeys.dart
+secrets.dart
+config/secrets.dart
+
+# Temporary files
+
+*.tmp
+*.temp
+*.bak
+
+# macOS
+
+macos/Flutter/ephemeral/
+
+# Windows
+
+windows/flutter/ephemeral/
+
+# Linux
+
+linux/flutter/ephemeral/
+
+# Web build
+
+web/.dart_tool/
+
+# Firebase (if added later)
+
+firebase-debug.log
+firebase.json.bak
+firestore-debug.log
+
+# Misc
+
+Thumbs.db
+desktop.ini
