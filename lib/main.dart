@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+final themeController = ValueNotifier<ThemeMode>(ThemeMode.dark);
+
 void main() {
   runApp(const ZaidPortfolioApp());
 }
@@ -11,24 +13,18 @@ class ZaidPortfolioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Zaid Portfolio',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-        scaffoldBackgroundColor: AppColors.bg,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.purple,
-          brightness: Brightness.dark,
-          primary: AppColors.purple,
-          secondary: AppColors.cyan,
-          tertiary: AppColors.gold,
-          surface: AppColors.card,
-        ),
-      ),
-      home: const LoginScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeController,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          title: 'Zaid Portfolio',
+          debugShowCheckedModeBanner: false,
+          themeMode: mode,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          home: const LoginScreen(),
+        );
+      },
     );
   }
 }
@@ -36,13 +32,202 @@ class ZaidPortfolioApp extends StatelessWidget {
 class AppColors {
   static const bg = Color(0xFF050816);
   static const bgDeep = Color(0xFF0A1020);
+  static const lightBg = Color(0xFFF6F3FF);
+  static const lightBgDeep = Color(0xFFEAFBFF);
   static const card = Color(0xFF101826);
   static const cardBorder = Color(0x26FFFFFF);
+  static const lightCardBorder = Color(0x2A24304A);
   static const purple = Color(0xFF8B5CF6);
   static const cyan = Color(0xFF22D3EE);
   static const gold = Color(0xFFF5C451);
   static const textMuted = Color(0xFF9AA4B2);
+  static const lightText = Color(0xFF172033);
+  static const lightMuted = Color(0xFF667085);
 }
+
+class AppTheme {
+  static ThemeData get dark => ThemeData(
+    brightness: Brightness.dark,
+    useMaterial3: true,
+    fontFamily: 'Roboto',
+    scaffoldBackgroundColor: AppColors.bg,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.purple,
+      brightness: Brightness.dark,
+      primary: AppColors.purple,
+      secondary: AppColors.cyan,
+      tertiary: AppColors.gold,
+      surface: AppColors.card,
+    ),
+    textTheme: Typography.whiteMountainView.apply(
+      bodyColor: Colors.white,
+      displayColor: Colors.white,
+    ),
+  );
+
+  static ThemeData get light => ThemeData(
+    brightness: Brightness.light,
+    useMaterial3: true,
+    fontFamily: 'Roboto',
+    scaffoldBackgroundColor: AppColors.lightBg,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.purple,
+      brightness: Brightness.light,
+      primary: AppColors.purple,
+      secondary: const Color(0xFF0891B2),
+      tertiary: const Color(0xFFB7791F),
+      surface: Colors.white,
+    ),
+    textTheme: Typography.blackMountainView.apply(
+      bodyColor: AppColors.lightText,
+      displayColor: AppColors.lightText,
+    ),
+  );
+}
+
+extension PortfolioTheme on BuildContext {
+  bool get isDarkPortfolio => Theme.of(this).brightness == Brightness.dark;
+
+  Color get primaryText => isDarkPortfolio ? Colors.white : AppColors.lightText;
+
+  Color get mutedText =>
+      isDarkPortfolio ? AppColors.textMuted : AppColors.lightMuted;
+
+  Color get softText =>
+      isDarkPortfolio ? Colors.white70 : const Color(0xFF344054);
+
+  Color get cardFill => isDarkPortfolio
+      ? Colors.white.withValues(alpha: 0.05)
+      : Colors.white.withValues(alpha: 0.9);
+
+  Color get cardBorder =>
+      isDarkPortfolio ? AppColors.cardBorder : AppColors.lightCardBorder;
+
+  Color get navFill => isDarkPortfolio
+      ? AppColors.bgDeep.withValues(alpha: 0.92)
+      : Colors.white.withValues(alpha: 0.92);
+}
+
+class PortfolioProject {
+  final IconData icon;
+  final String title;
+  final String tech;
+  final String description;
+  final String details;
+  final List<String> technologies;
+  final List<String> highlights;
+
+  const PortfolioProject({
+    required this.icon,
+    required this.title,
+    required this.tech,
+    required this.description,
+    required this.details,
+    required this.technologies,
+    required this.highlights,
+  });
+}
+
+class SkillLevel {
+  final String name;
+  final double level;
+  final IconData icon;
+
+  const SkillLevel({
+    required this.name,
+    required this.level,
+    required this.icon,
+  });
+}
+
+class SocialLink {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  const SocialLink({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+}
+
+const portfolioProjects = [
+  PortfolioProject(
+    icon: Icons.phone_iphone,
+    title: 'Personal Portfolio Mobile App',
+    tech: 'Flutter / Dart / Material 3',
+    description:
+        'A mobile portfolio app with login flow, bottom navigation, profile, projects, contact details, and a modern premium UI.',
+    details:
+        'This app presents a professional mobile portfolio with a polished login entry, responsive bottom navigation, profile content, skill progress, project browsing, and contact actions.',
+    technologies: ['Flutter', 'Dart', 'Material 3', 'Animations'],
+    highlights: [
+      'Premium glass-style cards and animated hero section',
+      'Bottom navigation across Home, Profile, Projects, and Contact',
+      'Light and dark themes with a persistent app-level toggle',
+    ],
+  ),
+  PortfolioProject(
+    icon: Icons.account_tree_outlined,
+    title: 'AI Automation Workflows',
+    tech: 'n8n / APIs / Google Workspace',
+    description:
+        'Automation workflows designed to reduce repetitive work, organize information, and improve productivity using AI tools.',
+    details:
+        'Workflow systems that connect tools, APIs, and AI services to automate repetitive tasks, manage information, and improve delivery speed.',
+    technologies: ['n8n', 'REST APIs', 'Google Workspace', 'AI Tools'],
+    highlights: [
+      'Designed repeatable automation flows for productivity tasks',
+      'Connected third-party APIs with structured data handling',
+      'Focused on clear outputs, reliability, and time savings',
+    ],
+  ),
+  PortfolioProject(
+    icon: Icons.dashboard_customize_outlined,
+    title: 'EduNest LMS Dashboard',
+    tech: 'React / Supabase / AI Integration',
+    description:
+        'A learning management dashboard with authentication, progress views, and AI-assisted learning features.',
+    details:
+        'A dashboard concept for learners and educators with structured learning progress, authentication, course insights, and AI-assisted support.',
+    technologies: ['React', 'Supabase', 'Firebase', 'AI Integration'],
+    highlights: [
+      'Dashboard layout for scanning progress and learning activity',
+      'Authentication-ready product structure',
+      'AI-assisted features for learning support and clarity',
+    ],
+  ),
+];
+
+const portfolioSkills = [
+  SkillLevel(name: 'Flutter', level: 0.9, icon: Icons.phone_android),
+  SkillLevel(name: 'Dart', level: 0.86, icon: Icons.data_object_rounded),
+  SkillLevel(name: 'UI/UX', level: 0.82, icon: Icons.palette_outlined),
+  SkillLevel(name: 'Firebase', level: 0.74, icon: Icons.local_fire_department),
+  SkillLevel(name: 'React', level: 0.72, icon: Icons.hub_outlined),
+  SkillLevel(name: 'Python', level: 0.7, icon: Icons.terminal),
+  SkillLevel(name: 'n8n Automation', level: 0.84, icon: Icons.auto_awesome),
+  SkillLevel(name: 'Git', level: 0.78, icon: Icons.merge_type_rounded),
+];
+
+const socialLinks = [
+  SocialLink(
+    title: 'LinkedIn',
+    subtitle: 'linkedin.com/in/zaidautomates',
+    icon: Icons.badge_outlined,
+  ),
+  SocialLink(
+    title: 'GitHub',
+    subtitle: 'github.com/zaidautomates',
+    icon: Icons.code_rounded,
+  ),
+  SocialLink(
+    title: 'Portfolio Website',
+    subtitle: 'zaidautomates.dev',
+    icon: Icons.travel_explore_rounded,
+  ),
+];
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -53,9 +238,18 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
+  static const _validEmail = 'zaidautomates@gmail.com';
+  static const _passwordSalt = 'codiora-portfolio-v2';
+  static const _validPasswordHash = 3724395600;
+
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<Offset> _slide;
+  bool _passwordVisible = false;
+  String? _authError;
 
   @override
   void initState() {
@@ -74,16 +268,34 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   void _login() {
+    FocusScope.of(context).unfocus();
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      setState(() => _authError = 'Please enter valid portfolio credentials.');
+      return;
+    }
+
+    final email = _emailController.text.trim().toLowerCase();
+    final passwordHash = _hashPassword(_passwordController.text);
+
+    if (email != _validEmail || passwordHash != _validPasswordHash) {
+      setState(() => _authError = 'Invalid email or password.');
+      return;
+    }
+
+    setState(() => _authError = null);
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const MainNavigation(),
-        transitionsBuilder: (_, animation, __, child) {
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const MainNavigation(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
             child: child,
@@ -91,6 +303,37 @@ class _LoginScreenState extends State<LoginScreen>
         },
       ),
     );
+  }
+
+  int _hashPassword(String password) {
+    var hash = 2166136261;
+    for (final codeUnit in '$_passwordSalt:$password'.codeUnits) {
+      hash = hash ^ codeUnit;
+      hash = (hash * 16777619) & 0xFFFFFFFF;
+    }
+    return hash;
+  }
+
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) {
+      return 'Email is required';
+    }
+    if (!email.contains('@') || !email.contains('.')) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    final password = value ?? '';
+    if (password.isEmpty) {
+      return 'Password is required';
+    }
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    return null;
   }
 
   @override
@@ -108,6 +351,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                 return Center(
                   child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
                     padding: EdgeInsets.all(compact ? 14 : 22),
                     child: FadeTransition(
                       opacity: _fade,
@@ -118,82 +362,119 @@ class _LoginScreenState extends State<LoginScreen>
                           child: GlassCard(
                             padding: EdgeInsets.all(cardPadding),
                             radius: 32,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const SizedBox(height: 2),
-                                PremiumAvatar(size: avatarSize),
-                                SizedBox(height: compact ? 16 : 22),
-                                Text(
-                                  'Zaid Ali',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.headlineMedium,
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Flutter Developer | AI Automation Builder | Computer Science Student',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: AppColors.textMuted,
-                                    fontSize: 14.5,
-                                    height: 1.45,
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(height: 2),
+                                  PremiumAvatar(size: avatarSize),
+                                  SizedBox(height: compact ? 16 : 22),
+                                  Text(
+                                    'Zaid Ali',
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium,
                                   ),
-                                ),
-                                SizedBox(height: compact ? 14 : 20),
-                                const Text(
-                                  'Enter the portfolio to explore projects, skills, and internship-ready work.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    height: 1.5,
-                                  ),
-                                ),
-                                SizedBox(height: compact ? 16 : 22),
-                                _authField(
-                                  icon: Icons.email_outlined,
-                                  hint: 'Email',
-                                ),
-                                const SizedBox(height: 12),
-                                _authField(
-                                  icon: Icons.lock_outline,
-                                  hint: 'Password',
-                                  obscure: true,
-                                ),
-                                SizedBox(height: compact ? 16 : 20),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 54,
-                                  child: ElevatedButton(
-                                    onPressed: _login,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.purple,
-                                      foregroundColor: Colors.white,
-                                      elevation: 12,
-                                      shadowColor: AppColors.purple.withOpacity(
-                                        0.35,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'Enter Portfolio',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                      ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Flutter Developer | AI Automation Builder | Computer Science Student',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: context.mutedText,
+                                      fontSize: 14.5,
+                                      height: 1.45,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 12),
-                                const Text(
-                                  'Welcome to my professional portfolio experience.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: AppColors.textMuted),
-                                ),
-                              ],
+                                  SizedBox(height: compact ? 14 : 20),
+                                  Text(
+                                    'Enter the portfolio using verified credentials to explore projects, skills, and internship-ready work.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: context.softText,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                  SizedBox(height: compact ? 16 : 22),
+                                  _authField(
+                                    controller: _emailController,
+                                    icon: Icons.email_outlined,
+                                    hint: 'Email',
+                                    keyboardType: TextInputType.emailAddress,
+                                    textInputAction: TextInputAction.next,
+                                    validator: _validateEmail,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _authField(
+                                    controller: _passwordController,
+                                    icon: Icons.lock_outline,
+                                    hint: 'Password',
+                                    obscure: !_passwordVisible,
+                                    textInputAction: TextInputAction.done,
+                                    validator: _validatePassword,
+                                    onFieldSubmitted: (_) => _login(),
+                                    suffixIcon: IconButton(
+                                      tooltip: _passwordVisible
+                                          ? 'Hide password'
+                                          : 'Show password',
+                                      onPressed: () => setState(
+                                        () => _passwordVisible =
+                                            !_passwordVisible,
+                                      ),
+                                      icon: Icon(
+                                        _passwordVisible
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                      ),
+                                    ),
+                                  ),
+                                  if (_authError != null) ...[
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      _authError!,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Color(0xFFFF6B6B),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                  SizedBox(height: compact ? 16 : 20),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 54,
+                                    child: ElevatedButton(
+                                      onPressed: _login,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.purple,
+                                        foregroundColor: Colors.white,
+                                        elevation: 12,
+                                        shadowColor: AppColors.purple
+                                            .withValues(alpha: 0.35),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Enter Portfolio',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Use assigned portfolio credentials to continue.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: context.mutedText),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -210,19 +491,40 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _authField({
+    required TextEditingController controller,
     required IconData icon,
     required String hint,
     bool obscure = false,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    String? Function(String?)? validator,
+    ValueChanged<String>? onFieldSubmitted,
+    Widget? suffixIcon,
   }) {
-    return TextField(
+    return TextFormField(
+      controller: controller,
       obscureText: obscure,
-      style: const TextStyle(color: Colors.white),
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      validator: validator,
+      onFieldSubmitted: onFieldSubmitted,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      style: TextStyle(color: context.primaryText),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: AppColors.cyan),
+        suffixIcon: suffixIcon == null
+            ? null
+            : IconTheme(
+                data: IconThemeData(color: context.mutedText),
+                child: suffixIcon,
+              ),
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textMuted),
+        hintStyle: TextStyle(color: context.mutedText),
+        errorMaxLines: 2,
         filled: true,
-        fillColor: Colors.white.withOpacity(0.06),
+        fillColor: context.isDarkPortfolio
+            ? Colors.white.withValues(alpha: 0.06)
+            : Colors.white.withValues(alpha: 0.78),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
@@ -233,7 +535,7 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+          borderSide: BorderSide(color: context.cardBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
@@ -277,12 +579,14 @@ class _MainNavigationState extends State<MainNavigation> {
           padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.bgDeep.withOpacity(0.92),
+              color: context.navFill,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: context.cardBorder),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.32),
+                  color: Colors.black.withValues(
+                    alpha: context.isDarkPortfolio ? 0.32 : 0.12,
+                  ),
                   blurRadius: 24,
                   offset: const Offset(0, 12),
                 ),
@@ -293,27 +597,28 @@ class _MainNavigationState extends State<MainNavigation> {
               elevation: 0,
               selectedIndex: index,
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              indicatorColor: AppColors.purple.withOpacity(0.28),
+              indicatorColor: AppColors.purple.withValues(alpha: 0.28),
+              surfaceTintColor: Colors.transparent,
               onDestinationSelected: _selectTab,
               destinations: const [
                 NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
+                  icon: Icon(Icons.home_rounded),
+                  selectedIcon: Icon(Icons.home_rounded),
                   label: 'Home',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person),
+                  icon: Icon(Icons.person_outline_rounded),
+                  selectedIcon: Icon(Icons.person_rounded),
                   label: 'Profile',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.work_outline),
-                  selectedIcon: Icon(Icons.work),
+                  icon: Icon(Icons.work_outline_rounded),
+                  selectedIcon: Icon(Icons.work_rounded),
                   label: 'Projects',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.mail_outline),
-                  selectedIcon: Icon(Icons.mail),
+                  icon: Icon(Icons.mail_outline_rounded),
+                  selectedIcon: Icon(Icons.mail_rounded),
                   label: 'Contact',
                 ),
               ],
@@ -466,9 +771,9 @@ class PremiumHeroSection extends StatelessWidget {
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                PremiumAvatar(size: 92),
-                SizedBox(width: 16),
+              children: [
+                const PremiumAvatar(size: 92),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -478,12 +783,11 @@ class PremiumHeroSection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -0.4,
+                          color: context.primaryText,
                         ),
                       ),
-                      SizedBox(height: 8),
-                      Text(
+                      const SizedBox(height: 8),
+                      const Text(
                         'Flutter Developer | AI Automation Builder | Computer Science Student',
                         style: TextStyle(
                           color: AppColors.cyan,
@@ -497,10 +801,10 @@ class PremiumHeroSection extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'I design and build premium mobile experiences, automation workflows, and practical software solutions that feel modern, useful, and ready for internship review.',
               style: TextStyle(
-                color: Colors.white70,
+                color: context.softText,
                 fontSize: 15.5,
                 height: 1.55,
               ),
@@ -531,8 +835,10 @@ class PremiumHeroSection extends StatelessWidget {
                   icon: const Icon(Icons.work_outline),
                   label: const Text('View Projects'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: AppColors.cyan.withOpacity(0.65)),
+                    foregroundColor: context.primaryText,
+                    side: BorderSide(
+                      color: AppColors.cyan.withValues(alpha: 0.65),
+                    ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
                       vertical: 14,
@@ -560,58 +866,58 @@ class ProfileScreen extends StatelessWidget {
       title: 'Profile',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          SectionHeader(
+        children: [
+          const SectionHeader(
             title: 'About Me',
             subtitle:
                 'A concise summary of my background, mindset, and the kind of work I enjoy.',
           ),
-          SizedBox(height: 14),
+          const SizedBox(height: 14),
           GlassCard(
             child: Text(
               'I am Zaid Ali, a Computer Science student in my 6th semester at Abdul Wali Khan University Mardan. I build practical digital products with Flutter, Dart, and modern backend tools. My focus is clean UI, reliable functionality, and automation-driven solutions that improve speed, clarity, and delivery.',
               style: TextStyle(
                 height: 1.65,
-                color: Colors.white70,
+                color: context.softText,
                 fontSize: 15,
               ),
             ),
           ),
-          SizedBox(height: 22),
-          SectionHeader(
+          const SizedBox(height: 22),
+          const SectionHeader(
             title: 'Education',
             subtitle: 'Current academic background and learning context.',
           ),
-          SizedBox(height: 14),
-          InfoCard(
+          const SizedBox(height: 14),
+          const InfoCard(
             icon: Icons.school_outlined,
             title: 'BS Computer Science',
-            subtitle: 'Abdul Wali Khan University Mardan • 6th Semester',
+            subtitle: 'Abdul Wali Khan University Mardan / 6th Semester',
           ),
-          SizedBox(height: 22),
-          SectionHeader(
+          const SizedBox(height: 22),
+          const SectionHeader(
             title: 'Focus Areas',
             subtitle:
                 'The main areas I am actively developing and applying in projects.',
           ),
-          SizedBox(height: 14),
-          FocusAreaGrid(),
-          SizedBox(height: 22),
-          SectionHeader(
+          const SizedBox(height: 14),
+          const FocusAreaGrid(),
+          const SizedBox(height: 22),
+          const SectionHeader(
             title: 'Experience',
             subtitle:
                 'Selected practical work that reflects my internship-ready skills.',
           ),
-          SizedBox(height: 14),
-          ExperienceGrid(),
-          SizedBox(height: 22),
-          SectionHeader(
+          const SizedBox(height: 14),
+          const ExperienceGrid(),
+          const SizedBox(height: 22),
+          const SectionHeader(
             title: 'Skills',
             subtitle:
                 'Technologies and tools I use across projects and learning.',
           ),
-          SizedBox(height: 14),
-          SkillWrap(),
+          const SizedBox(height: 14),
+          const SkillWrap(),
         ],
       ),
     );
@@ -690,23 +996,15 @@ class SkillWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const skills = [
-      'Flutter',
-      'Dart',
-      'Python',
-      'AI/ML',
-      'n8n',
-      'React',
-      'Supabase',
-      'Firebase',
-      'Git',
-      'UI/UX',
-    ];
-
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: skills.map((skill) => SkillChip(label: skill)).toList(),
+    return Column(
+      children: portfolioSkills
+          .map(
+            (skill) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SkillProgressCard(skill: skill),
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -724,7 +1022,7 @@ class ProjectsScreen extends StatelessWidget {
           ProjectCard(
             icon: Icons.phone_iphone,
             title: 'Personal Portfolio Mobile App',
-            tech: 'Flutter • Dart • Material 3',
+            tech: 'Flutter / Dart / Material 3',
             description:
                 'A mobile portfolio app with login flow, bottom navigation, profile, projects, contact details, and a modern premium UI.',
           ),
@@ -732,7 +1030,7 @@ class ProjectsScreen extends StatelessWidget {
           ProjectCard(
             icon: Icons.account_tree_outlined,
             title: 'AI Automation Workflows',
-            tech: 'n8n • APIs • Google Workspace',
+            tech: 'n8n / APIs / Google Workspace',
             description:
                 'Automation workflows designed to reduce repetitive work, organize information, and improve productivity using AI tools.',
           ),
@@ -740,7 +1038,7 @@ class ProjectsScreen extends StatelessWidget {
           ProjectCard(
             icon: Icons.dashboard_customize_outlined,
             title: 'EduNest LMS Dashboard',
-            tech: 'React • Supabase • AI Integration',
+            tech: 'React / Supabase / AI Integration',
             description:
                 'A learning management dashboard with authentication, progress views, and AI-assisted learning features.',
           ),
@@ -766,6 +1064,15 @@ class ContactScreen extends StatelessWidget {
                 'Ways to reach me for internships and professional collaboration.',
           ),
           const SizedBox(height: 14),
+          SocialButtonGrid(
+            links: socialLinks,
+            onTap: (link) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Opening ${link.title}...')),
+              );
+            },
+          ),
+          const SizedBox(height: 18),
           InfoCard(
             icon: Icons.email_outlined,
             title: 'Email',
@@ -774,28 +1081,6 @@ class ContactScreen extends StatelessWidget {
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(const SnackBar(content: Text('Opening Email...')));
-            },
-          ),
-          const SizedBox(height: 12),
-          InfoCard(
-            icon: Icons.code,
-            title: 'GitHub',
-            subtitle: 'github.com/zaidautomates',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Opening GitHub profile...')),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          InfoCard(
-            icon: Icons.business_center_outlined,
-            title: 'LinkedIn',
-            subtitle: 'linkedin.com/in/zaidautomates',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Opening LinkedIn profile...')),
-              );
             },
           ),
           const SizedBox(height: 12),
@@ -844,20 +1129,20 @@ class ContactScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          const Center(
+          Center(
             child: Text(
               'Built with Flutter & Dart',
               style: TextStyle(
-                color: AppColors.textMuted,
+                color: context.mutedText,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
           const SizedBox(height: 6),
-          const Center(
+          Center(
             child: Text(
-              '© 2026 Zaid Ali',
-              style: TextStyle(color: AppColors.textMuted, fontSize: 12.5),
+              'Copyright 2026 Zaid Ali',
+              style: TextStyle(color: context.mutedText, fontSize: 12.5),
             ),
           ),
         ],
@@ -879,6 +1164,7 @@ class PortfolioPage extends StatelessWidget {
         const AppBackdrop(),
         SafeArea(
           child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 26),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -895,10 +1181,10 @@ class PortfolioPage extends StatelessWidget {
                             style: Theme.of(context).textTheme.headlineLarge,
                           ),
                           const SizedBox(height: 6),
-                          const Text(
+                          Text(
                             'Premium internship-ready personal portfolio',
                             style: TextStyle(
-                              color: AppColors.textMuted,
+                              color: context.mutedText,
                               fontSize: 13.5,
                             ),
                           ),
@@ -906,19 +1192,18 @@ class PortfolioPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
+                    const ThemeToggleButton(),
+                    const SizedBox(width: 10),
                     const PremiumAvatar(size: 52),
                   ],
                 ),
                 const SizedBox(height: 18),
                 child,
                 const SizedBox(height: 18),
-                const Center(
+                Center(
                   child: Text(
                     'Professional mobile portfolio submission',
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 12.5,
-                    ),
+                    style: TextStyle(color: context.mutedText, fontSize: 12.5),
                   ),
                 ),
               ],
@@ -935,12 +1220,16 @@ class AppBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.isDarkPortfolio
+        ? const [AppColors.bgDeep, AppColors.bg, AppColors.bg]
+        : const [AppColors.lightBgDeep, AppColors.lightBg, Color(0xFFFFFFFF)];
+
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.45,
-          colors: [AppColors.bgDeep, AppColors.bg, AppColors.bg],
+          colors: colors,
         ),
       ),
       child: Stack(
@@ -948,17 +1237,29 @@ class AppBackdrop extends StatelessWidget {
           Positioned(
             top: -48,
             left: -40,
-            child: _GlowOrb(color: AppColors.purple, size: 170),
+            child: _GlowOrb(
+              color: AppColors.purple,
+              size: 170,
+              opacity: context.isDarkPortfolio ? 0.24 : 0.13,
+            ),
           ),
           Positioned(
             top: 120,
             right: -30,
-            child: _GlowOrb(color: AppColors.cyan, size: 150),
+            child: _GlowOrb(
+              color: AppColors.cyan,
+              size: 150,
+              opacity: context.isDarkPortfolio ? 0.24 : 0.12,
+            ),
           ),
           Positioned(
             bottom: 90,
             left: 24,
-            child: _GlowOrb(color: AppColors.gold, size: 130),
+            child: _GlowOrb(
+              color: AppColors.gold,
+              size: 130,
+              opacity: context.isDarkPortfolio ? 0.24 : 0.11,
+            ),
           ),
         ],
       ),
@@ -969,8 +1270,13 @@ class AppBackdrop extends StatelessWidget {
 class _GlowOrb extends StatelessWidget {
   final Color color;
   final double size;
+  final double opacity;
 
-  const _GlowOrb({required this.color, required this.size});
+  const _GlowOrb({
+    required this.color,
+    required this.size,
+    required this.opacity,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -980,7 +1286,10 @@ class _GlowOrb extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [color.withOpacity(0.24), color.withOpacity(0.0)],
+          colors: [
+            color.withValues(alpha: opacity),
+            color.withValues(alpha: 0.0),
+          ],
         ),
       ),
     );
@@ -1009,18 +1318,23 @@ class GlassCard extends StatelessWidget {
           width: double.infinity,
           padding: padding,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: context.cardFill,
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: context.cardBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.28),
+                color: Colors.black.withValues(
+                  alpha: context.isDarkPortfolio ? 0.28 : 0.08,
+                ),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
               ),
             ],
           ),
-          child: child,
+          child: DefaultTextStyle.merge(
+            style: TextStyle(color: context.primaryText),
+            child: child,
+          ),
         ),
       ),
     );
@@ -1070,7 +1384,7 @@ class PremiumAvatar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.purple.withOpacity(0.28),
+            color: AppColors.purple.withValues(alpha: 0.28),
             blurRadius: 24,
             spreadRadius: 1,
           ),
@@ -1090,7 +1404,9 @@ class PremiumAvatar extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.bgDeep,
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
                   ),
                   child: const Center(
                     child: Text(
@@ -1125,17 +1441,17 @@ class SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.w800,
-            letterSpacing: -0.2,
+            color: context.primaryText,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           subtitle,
-          style: const TextStyle(
-            color: AppColors.textMuted,
+          style: TextStyle(
+            color: context.mutedText,
             fontSize: 13.5,
             height: 1.45,
           ),
@@ -1164,23 +1480,98 @@ class StatCard extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: context.primaryText,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 label,
-                style: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 12.5,
-                ),
+                style: TextStyle(color: context.mutedText, fontSize: 12.5),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class PremiumIconBadge extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final Color accent;
+  final Color? secondAccent;
+  final BorderRadiusGeometry? borderRadius;
+
+  const PremiumIconBadge({
+    super.key,
+    required this.icon,
+    this.size = 48,
+    this.accent = AppColors.cyan,
+    this.secondAccent,
+    this.borderRadius,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = borderRadius ?? BorderRadius.circular(size * 0.34);
+    final secondary = secondAccent ?? AppColors.purple;
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.withValues(alpha: context.isDarkPortfolio ? 0.34 : 0.22),
+            secondary.withValues(alpha: context.isDarkPortfolio ? 0.22 : 0.14),
+          ],
+        ),
+        border: Border.all(
+          color: accent.withValues(
+            alpha: context.isDarkPortfolio ? 0.34 : 0.22,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(
+              alpha: context.isDarkPortfolio ? 0.18 : 0.12,
+            ),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -size * 0.16,
+            top: -size * 0.18,
+            child: Container(
+              width: size * 0.46,
+              height: size * 0.46,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(
+                  alpha: context.isDarkPortfolio ? 0.08 : 0.42,
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: Icon(
+              icon,
+              color: context.isDarkPortfolio ? Colors.white : accent,
+              size: size * 0.48,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1205,19 +1596,10 @@ class ActionCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.purple.withOpacity(0.32),
-                    AppColors.cyan.withOpacity(0.18),
-                  ],
-                ),
-              ),
-              child: Icon(icon, color: Colors.white),
+            PremiumIconBadge(
+              icon: icon,
+              accent: AppColors.cyan,
+              secondAccent: AppColors.purple,
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1226,19 +1608,16 @@ class ActionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: context.primaryText,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      height: 1.45,
-                    ),
+                    style: TextStyle(color: context.mutedText, height: 1.45),
                   ),
                 ],
               ),
@@ -1268,14 +1647,12 @@ class FocusAreaCard extends StatelessWidget {
       child: GlassCard(
         child: Row(
           children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.purple.withOpacity(0.18),
-              ),
-              child: Icon(icon, color: AppColors.gold),
+            PremiumIconBadge(
+              icon: icon,
+              size: 46,
+              accent: AppColors.gold,
+              secondAccent: AppColors.purple,
+              borderRadius: BorderRadius.circular(999),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1284,18 +1661,16 @@ class FocusAreaCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w800,
+                      color: context.primaryText,
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      height: 1.45,
-                    ),
+                    style: TextStyle(color: context.mutedText, height: 1.45),
                   ),
                 ],
               ),
@@ -1399,19 +1774,10 @@ class ExperienceCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.gold.withOpacity(0.24),
-                    AppColors.purple.withOpacity(0.18),
-                  ],
-                ),
-              ),
-              child: Icon(icon, color: Colors.white),
+            PremiumIconBadge(
+              icon: icon,
+              accent: AppColors.gold,
+              secondAccent: AppColors.cyan,
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1420,18 +1786,16 @@ class ExperienceCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w800,
+                      color: context.primaryText,
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      height: 1.45,
-                    ),
+                    style: TextStyle(color: context.mutedText, height: 1.45),
                   ),
                 ],
               ),
@@ -1463,14 +1827,11 @@ class InfoCard extends StatelessWidget {
       child: GlassCard(
         child: Row(
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: AppColors.purple.withOpacity(0.17),
-              ),
-              child: Icon(icon, color: AppColors.cyan),
+            PremiumIconBadge(
+              icon: icon,
+              size: 50,
+              accent: AppColors.cyan,
+              secondAccent: AppColors.purple,
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -1479,18 +1840,16 @@ class InfoCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w800,
+                      color: context.primaryText,
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      height: 1.45,
-                    ),
+                    style: TextStyle(color: context.mutedText, height: 1.45),
                   ),
                 ],
               ),
@@ -1512,6 +1871,106 @@ class InfoCard extends StatelessWidget {
   }
 }
 
+class SocialButtonGrid extends StatelessWidget {
+  final List<SocialLink> links;
+  final ValueChanged<SocialLink> onTap;
+
+  const SocialButtonGrid({super.key, required this.links, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final narrow = constraints.maxWidth < 430;
+        final children = links
+            .map(
+              (link) => narrow
+                  ? SocialActionButton(link: link, onTap: () => onTap(link))
+                  : Expanded(
+                      child: SocialActionButton(
+                        link: link,
+                        onTap: () => onTap(link),
+                      ),
+                    ),
+            )
+            .toList();
+
+        if (narrow) {
+          return Column(
+            children: [
+              for (final child in children) ...[
+                child,
+                const SizedBox(height: 10),
+              ],
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            children[0],
+            const SizedBox(width: 10),
+            children[1],
+            const SizedBox(width: 10),
+            children[2],
+          ],
+        );
+      },
+    );
+  }
+}
+
+class SocialActionButton extends StatelessWidget {
+  final SocialLink link;
+  final VoidCallback onTap;
+
+  const SocialActionButton({
+    super.key,
+    required this.link,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedCard(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: GlassCard(
+          padding: const EdgeInsets.all(14),
+          radius: 22,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PremiumIconBadge(
+                icon: link.icon,
+                size: 44,
+                accent: AppColors.cyan,
+                secondAccent: AppColors.gold,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                link.title,
+                style: TextStyle(
+                  color: context.primaryText,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                link.subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: context.mutedText, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class ProjectCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -1526,81 +1985,340 @@ class ProjectCard extends StatelessWidget {
     required this.description,
   });
 
+  PortfolioProject get project => PortfolioProject(
+    icon: icon,
+    title: title,
+    tech: tech,
+    description: description,
+    details:
+        '$description This project focuses on practical implementation, clear structure, and a polished user experience for portfolio review.',
+    technologies: tech
+        .split(RegExp(r'\s*/\s*'))
+        .where((item) => item.trim().isNotEmpty)
+        .map((item) => item.trim())
+        .toList(),
+    highlights: const [
+      'Modern responsive interface with premium cards',
+      'Clear navigation and user-friendly content structure',
+      'Project-ready architecture for future expansion',
+    ],
+  );
+
+  void _openDetails(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            ProjectDetailScreen(project: project),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.04),
+                end: Offset.zero,
+              ).animate(curved),
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedCard(
-      child: GlassCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.purple.withOpacity(0.30),
-                        AppColors.cyan.withOpacity(0.18),
+      child: InkWell(
+        onTap: () => _openDetails(context),
+        borderRadius: BorderRadius.circular(24),
+        child: GlassCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  PremiumIconBadge(
+                    icon: icon,
+                    size: 52,
+                    accent: AppColors.purple,
+                    secondAccent: AppColors.cyan,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 17.5,
+                            fontWeight: FontWeight.w800,
+                            color: context.primaryText,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          tech,
+                          style: const TextStyle(
+                            color: AppColors.cyan,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  child: Icon(icon, color: AppColors.gold),
+                  Icon(Icons.chevron_right, color: context.mutedText),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                description,
+                style: TextStyle(color: context.softText, height: 1.55),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: () => _openDetails(context),
+                  icon: const Icon(Icons.open_in_new, size: 18),
+                  label: const Text('View Project'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: context.primaryText,
+                    side: BorderSide(
+                      color: AppColors.gold.withValues(alpha: 0.55),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ThemeToggleButton extends StatelessWidget {
+  const ThemeToggleButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDarkPortfolio;
+
+    return Tooltip(
+      message: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+      child: InkWell(
+        onTap: () {
+          themeController.value = isDark ? ThemeMode.light : ThemeMode.dark;
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 240),
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: context.cardFill,
+            border: Border.all(color: context.cardBorder),
+          ),
+          child: Icon(
+            isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+            color: isDark ? AppColors.gold : AppColors.purple,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ProjectDetailScreen extends StatelessWidget {
+  final PortfolioProject project;
+
+  const ProjectDetailScreen({super.key, required this.project});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          const AppBackdrop(),
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 26),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 17.5,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                      IconButton.filledTonal(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Project Details',
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        tech,
-                        style: const TextStyle(
-                          color: AppColors.cyan,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                        ),
-                      ),
+                      const ThemeToggleButton(),
                     ],
+                  ),
+                  const SizedBox(height: 18),
+                  GlassCard(
+                    radius: 30,
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PremiumIconBadge(
+                          icon: project.icon,
+                          size: 64,
+                          accent: AppColors.purple,
+                          secondAccent: AppColors.gold,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          project.title,
+                          style: TextStyle(
+                            color: context.primaryText,
+                            fontSize: 25,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          project.tech,
+                          style: const TextStyle(
+                            color: AppColors.cyan,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          project.details,
+                          style: TextStyle(
+                            color: context.softText,
+                            height: 1.58,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  const SectionHeader(
+                    title: 'Technologies Used',
+                    subtitle:
+                        'Tools and frameworks used to build or design this project.',
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: project.technologies
+                        .map((tech) => SkillChip(label: tech))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 22),
+                  const SectionHeader(
+                    title: 'Project Highlights',
+                    subtitle:
+                        'Key points that show the project value and user experience.',
+                  ),
+                  const SizedBox(height: 14),
+                  ...project.highlights.map(
+                    (highlight) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: InfoCard(
+                        icon: Icons.check_circle_outline,
+                        title: highlight,
+                        subtitle: 'Included as part of the Week 2 upgrade.',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SkillProgressCard extends StatelessWidget {
+  final SkillLevel skill;
+
+  const SkillProgressCard({super.key, required this.skill});
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (skill.level * 100).round();
+
+    return AnimatedCard(
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
+        radius: 22,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                PremiumIconBadge(
+                  icon: skill.icon,
+                  size: 44,
+                  accent: AppColors.cyan,
+                  secondAccent: AppColors.purple,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    skill.name,
+                    style: TextStyle(
+                      color: context.primaryText,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15.5,
+                    ),
+                  ),
+                ),
+                Text(
+                  '$percent%',
+                  style: const TextStyle(
+                    color: AppColors.gold,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              description,
-              style: const TextStyle(color: Colors.white70, height: 1.55),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Project details coming soon'),
+            const SizedBox(height: 12),
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: skill.level),
+              duration: const Duration(milliseconds: 850),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, _) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: value,
+                    minHeight: 9,
+                    backgroundColor: context.isDarkPortfolio
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : AppColors.lightMuted.withValues(alpha: 0.14),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.purple,
                     ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: BorderSide(color: AppColors.gold.withOpacity(0.55)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
                   ),
-                ),
-                child: const Text('View Project'),
-              ),
+                );
+              },
             ),
           ],
         ),
@@ -1620,13 +2338,13 @@ class SkillChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: Colors.white.withOpacity(0.06),
-        border: Border.all(color: Colors.white.withOpacity(0.09)),
+        color: Colors.white.withValues(alpha: 0.06),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: context.primaryText,
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
