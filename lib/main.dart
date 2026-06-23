@@ -11,6 +11,14 @@ void main() async {
   runApp(const ZaidPortfolioApp());
 }
 
+class ClampedScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+}
+
 class ZaidPortfolioApp extends StatelessWidget {
   const ZaidPortfolioApp({super.key});
 
@@ -25,6 +33,7 @@ class ZaidPortfolioApp extends StatelessWidget {
           themeMode: portfolioState.themeMode,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
+          scrollBehavior: ClampedScrollBehavior(),
           home: const LoginScreen(),
         );
       },
@@ -821,7 +830,7 @@ class HomeScreen extends StatelessWidget {
             spacing: 12,
             runSpacing: 12,
             children: const [
-              StatCard(label: 'Projects', value: '3+'),
+              StatCard(label: 'Projects', value: '6+'),
               StatCard(label: 'Skills', value: '10+'),
               StatCard(label: 'Learning', value: 'AI/ML'),
             ],
@@ -928,19 +937,20 @@ class PremiumHeroSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const PremiumAvatar(size: 92),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 340;
+                if (isNarrow) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const Center(child: PremiumAvatar(size: 92)),
+                      const SizedBox(height: 16),
                       Text(
                         portfolioState.name,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 30,
+                          fontSize: 26,
                           fontWeight: FontWeight.w900,
                           color: context.primaryText,
                         ),
@@ -948,6 +958,7 @@ class PremiumHeroSection extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         portfolioState.title,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: AppColors.cyan,
                           fontWeight: FontWeight.w700,
@@ -955,9 +966,41 @@ class PremiumHeroSection extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
-                ),
-              ],
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const PremiumAvatar(size: 92),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            portfolioState.name,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              color: context.primaryText,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            portfolioState.title,
+                            style: const TextStyle(
+                              color: AppColors.cyan,
+                              fontWeight: FontWeight.w700,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 18),
             Text(
@@ -1632,9 +1675,18 @@ class ContactScreen extends StatelessWidget {
             title: 'Phone',
             subtitle: portfolioState.phone,
             onTap: () {
-              final phoneUri = Uri.tryParse('tel:${portfolioState.phone}');
-              if (phoneUri != null) {
-                launchUrl(phoneUri);
+              if (portfolioState.phone.trim() == 'Available upon request') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Phone number is available upon request.'),
+                    backgroundColor: AppColors.purple,
+                  ),
+                );
+              } else {
+                final phoneUri = Uri.tryParse('tel:${portfolioState.phone.trim()}');
+                if (phoneUri != null) {
+                  launchUrl(phoneUri, mode: LaunchMode.externalApplication);
+                }
               }
             },
           ),
@@ -2611,157 +2663,150 @@ class ProjectCard extends StatelessWidget {
     return AnimatedCard(
       child: InkWell(
         onTap: () => _openDetails(context),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(22),
         child: GlassCard(
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cover image with a glassmorphic floating category badge
-              Stack(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                    child: SizedBox(
-                      height: 160,
-                      width: double.infinity,
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: context.cardBorder,
+                        width: 1,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(13),
                       child: Image.asset(
                         project.imagePath,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppColors.purple.withValues(alpha: 0.8),
-                                  AppColors.cyan.withValues(alpha: 0.8)
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                project.icon,
-                                size: 52,
-                                color: Colors.white,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.25),
-                            ),
-                          ),
-                          child: Text(
-                            project.category,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 11.5,
-                              letterSpacing: 0.5,
-                            ),
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.card,
+                          child: const Icon(
+                            Icons.broken_image_outlined,
+                            size: 24,
+                            color: AppColors.textMuted,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-              
-              // Text Content
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        PremiumIconBadge(
-                          icon: project.icon,
-                          size: 38,
-                          accent: AppColors.purple,
-                          secondAccent: AppColors.cyan,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
                                 project.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 16.5,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
                                   color: context.primaryText,
                                 ),
                               ),
-                              const SizedBox(height: 3),
-                              Text(
-                                project.tech,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: AppColors.cyan.withValues(alpha: 0.12),
+                              ),
+                              child: Text(
+                                project.category,
                                 style: const TextStyle(
                                   color: AppColors.cyan,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10.5,
                                 ),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          project.tech,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: context.softText,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      project.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: context.softText,
-                        fontSize: 13.5,
-                        height: 1.48,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    OutlinedButton.icon(
-                      onPressed: () => _openDetails(context),
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      label: const Text(
-                        'View Project',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: context.primaryText,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        side: BorderSide(
-                          color: AppColors.gold.withValues(alpha: 0.6),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                project.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: context.softText,
+                  fontSize: 13.5,
+                  height: 1.48,
                 ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Wrap(
+                    spacing: 6,
+                    children: project.technologies.take(2).map((t) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          color: context.isDarkPortfolio
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : Colors.black.withValues(alpha: 0.03),
+                        ),
+                        child: Text(
+                          t,
+                          style: TextStyle(
+                            color: context.mutedText,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => _openDetails(context),
+                    icon: const Icon(Icons.open_in_new, size: 14),
+                    label: const Text(
+                      'View Project',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: context.primaryText,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      side: BorderSide(
+                        color: AppColors.gold.withValues(alpha: 0.6),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -2806,23 +2851,42 @@ class ThemeToggleButton extends StatelessWidget {
 
 Future<void> launchProjectUrl(BuildContext context, String? url) async {
   if (url == null || url.trim().isEmpty) return;
-  final uri = Uri.tryParse(url.trim());
+  
+  var urlString = url.trim();
+  if (!urlString.startsWith('http://') && !urlString.startsWith('https://') && 
+      !urlString.startsWith('mailto:') && !urlString.startsWith('tel:')) {
+    urlString = 'https://$urlString';
+  }
+
+  final uri = Uri.tryParse(urlString);
   if (uri != null) {
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not open link: $url')),
-          );
-        }
+      // Try launching in external application directly (e.g. Chrome/Safari or external apps)
+      bool launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        // Fallback to platform default
+        launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open link: $urlString')),
+        );
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error opening link: $e')),
-        );
+      // Fallback try-catch in case LaunchMode.externalApplication throws on some platforms
+      try {
+        final launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+        if (!launched && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not open link: $urlString')),
+          );
+        }
+      } catch (err) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error opening link: $err')),
+          );
+        }
       }
     }
   } else {
@@ -2870,45 +2934,30 @@ class ProjectDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   
-                  // Project Image / Banner
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: SizedBox(
-                      height: 200,
-                      width: double.infinity,
+                  // Beautiful and Professional Project Preview Image Banner
+                  Container(
+                    height: 180,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: context.cardBorder,
+                        width: 1,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(23),
                       child: Image.asset(
                         project.imagePath,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          // Beautiful fallback container
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [AppColors.purple.withValues(alpha: 0.8), AppColors.cyan.withValues(alpha: 0.8)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(project.icon, size: 64, color: Colors.white),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    project.category.toUpperCase(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 16,
-                                      letterSpacing: 1.4,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.card,
+                          child: const Icon(
+                            Icons.broken_image_outlined,
+                            size: 48,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -2923,12 +2972,6 @@ class ProjectDetailScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            PremiumIconBadge(
-                              icon: project.icon,
-                              size: 58,
-                              accent: AppColors.purple,
-                              secondAccent: AppColors.gold,
-                            ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                               decoration: BoxDecoration(
