@@ -1,10 +1,13 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-final themeController = ValueNotifier<ThemeMode>(ThemeMode.dark);
+final portfolioState = PortfolioState();
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await portfolioState.init();
   runApp(const ZaidPortfolioApp());
 }
 
@@ -13,13 +16,13 @@ class ZaidPortfolioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeController,
-      builder: (context, mode, _) {
+    return AnimatedBuilder(
+      animation: portfolioState,
+      builder: (context, _) {
         return MaterialApp(
           title: 'Zaid Portfolio',
           debugShowCheckedModeBanner: false,
-          themeMode: mode,
+          themeMode: portfolioState.themeMode,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           home: const LoginScreen(),
@@ -28,6 +31,81 @@ class ZaidPortfolioApp extends StatelessWidget {
     );
   }
 }
+
+class PortfolioState extends ChangeNotifier {
+  late SharedPreferences _prefs;
+  bool _initialized = false;
+
+  // Theme state
+  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode get themeMode => _themeMode;
+
+  // Profile state
+  String _name = 'Zaid Ali';
+  String get name => _name;
+
+  String _title = 'Flutter Developer | AI Automation Builder | Computer Science Student';
+  String get title => _title;
+
+  String _bio = 'I am Zaid Ali, a Computer Science student in my 6th semester at Abdul Wali Khan University Mardan. I build practical digital products with Flutter, Dart, and modern backend tools. My focus is clean UI, reliable functionality, and automation-driven solutions that improve speed, clarity, and delivery.';
+  String get bio => _bio;
+
+  // Contact state
+  String _email = 'zaidautomates@gmail.com';
+  String get email => _email;
+
+  String _phone = 'Available upon request';
+  String get phone => _phone;
+
+  bool get initialized => _initialized;
+
+  Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+    
+    // Load theme
+    final themeStr = _prefs.getString('pref_theme_mode') ?? 'dark';
+    _themeMode = themeStr == 'light' ? ThemeMode.light : ThemeMode.dark;
+
+    // Load profile info
+    _name = _prefs.getString('pref_profile_name') ?? 'Zaid Ali';
+    _title = _prefs.getString('pref_profile_title') ?? 
+        'Flutter Developer | AI Automation Builder | Computer Science Student';
+    _bio = _prefs.getString('pref_profile_bio') ?? 
+        'I am Zaid Ali, a Computer Science student in my 6th semester at Abdul Wali Khan University Mardan. I build practical digital products with Flutter, Dart, and modern backend tools. My focus is clean UI, reliable functionality, and automation-driven solutions that improve speed, clarity, and delivery.';
+
+    // Load contact info
+    _email = _prefs.getString('pref_contact_email') ?? 'zaidautomates@gmail.com';
+    _phone = _prefs.getString('pref_contact_phone') ?? 'Available upon request';
+
+    _initialized = true;
+    notifyListeners();
+  }
+
+  Future<void> updateTheme(ThemeMode mode) async {
+    _themeMode = mode;
+    await _prefs.setString('pref_theme_mode', mode == ThemeMode.light ? 'light' : 'dark');
+    notifyListeners();
+  }
+
+  Future<void> updateProfile({required String name, required String title, required String bio}) async {
+    _name = name;
+    _title = title;
+    _bio = bio;
+    await _prefs.setString('pref_profile_name', name);
+    await _prefs.setString('pref_profile_title', title);
+    await _prefs.setString('pref_profile_bio', bio);
+    notifyListeners();
+  }
+
+  Future<void> updateContact({required String email, required String phone}) async {
+    _email = email;
+    _phone = phone;
+    await _prefs.setString('pref_contact_email', email);
+    await _prefs.setString('pref_contact_phone', phone);
+    notifyListeners();
+  }
+}
+
 
 class AppColors {
   static const bg = Color(0xFF050816);
@@ -109,6 +187,7 @@ extension PortfolioTheme on BuildContext {
 }
 
 class PortfolioProject {
+  final String id;
   final IconData icon;
   final String title;
   final String tech;
@@ -116,8 +195,13 @@ class PortfolioProject {
   final String details;
   final List<String> technologies;
   final List<String> highlights;
+  final String category;
+  final String imagePath;
+  final String? gitHubUrl;
+  final String? liveUrl;
 
   const PortfolioProject({
+    required this.id,
     required this.icon,
     required this.title,
     required this.tech,
@@ -125,6 +209,10 @@ class PortfolioProject {
     required this.details,
     required this.technologies,
     required this.highlights,
+    required this.category,
+    required this.imagePath,
+    this.gitHubUrl,
+    this.liveUrl,
   });
 }
 
@@ -154,49 +242,120 @@ class SocialLink {
 
 const portfolioProjects = [
   PortfolioProject(
+    id: 'portfolio_app',
     icon: Icons.phone_iphone,
     title: 'Personal Portfolio Mobile App',
     tech: 'Flutter / Dart / Material 3',
     description:
-        'A mobile portfolio app with login flow, bottom navigation, profile, projects, contact details, and a modern premium UI.',
+        'A premium mobile portfolio application designed in Flutter, featuring glassmorphism, dynamic animations, and state persistence.',
     details:
-        'This app presents a professional mobile portfolio with a polished login entry, responsive bottom navigation, profile content, skill progress, project browsing, and contact actions.',
-    technologies: ['Flutter', 'Dart', 'Material 3', 'Animations'],
+        'This app showcases a personal portfolio in a professional mobile layout. It integrates smooth animations, a password-secured login screen, local database persistence, dynamic profile editing, and search/filter functionality.',
+    technologies: ['Flutter', 'Dart', 'Material 3', 'Shared Preferences', 'Animations'],
     highlights: [
-      'Premium glass-style cards and animated hero section',
-      'Bottom navigation across Home, Profile, Projects, and Contact',
-      'Light and dark themes with a persistent app-level toggle',
+      'Sleek glassmorphic card layouts with custom Bezier brand icons',
+      'Reactive navigation and state management via ChangeNotifier',
+      'Persistent theme settings and local user preferences',
     ],
+    category: 'Mobile',
+    imagePath: 'assets/personal_portfolio_app.png',
+    gitHubUrl: 'https://github.com/zaidautomates/zaid-portfolio-app',
   ),
   PortfolioProject(
-    icon: Icons.account_tree_outlined,
+    id: 'ai_automation',
+    icon: Icons.auto_awesome,
     title: 'AI Automation Workflows',
     tech: 'n8n / APIs / Google Workspace',
     description:
         'Automation workflows designed to reduce repetitive work, organize information, and improve productivity using AI tools.',
     details:
-        'Workflow systems that connect tools, APIs, and AI services to automate repetitive tasks, manage information, and improve delivery speed.',
-    technologies: ['n8n', 'REST APIs', 'Google Workspace', 'AI Tools'],
+        'An ecosystem of automation scripts and visual workflows built in n8n. It automatically intercepts support emails, processes them using ChatGPT for intent analysis, retrieves context from a vector database, and generates drafts or updates Google Workspace records.',
+    technologies: ['n8n', 'OpenAI API', 'Vector Databases', 'Google APIs', 'Python'],
     highlights: [
-      'Designed repeatable automation flows for productivity tasks',
-      'Connected third-party APIs with structured data handling',
-      'Focused on clear outputs, reliability, and time savings',
+      'Saves 15+ hours weekly by automating customer ticket triage',
+      'Utilizes AI agent logic to intelligently route complex issues',
+      'Real-time logging and failure notifications using Discord webhooks',
     ],
+    category: 'AI/ML',
+    imagePath: 'assets/ai_workflows.png',
+    gitHubUrl: 'https://github.com/zaidautomates/ai-workflows',
+    liveUrl: 'https://n8n.io',
   ),
   PortfolioProject(
-    icon: Icons.dashboard_customize_outlined,
+    id: 'edunest_lms',
+    icon: Icons.school_outlined,
     title: 'EduNest LMS Dashboard',
     tech: 'React / Supabase / AI Integration',
     description:
         'A learning management dashboard with authentication, progress views, and AI-assisted learning features.',
     details:
-        'A dashboard concept for learners and educators with structured learning progress, authentication, course insights, and AI-assisted support.',
-    technologies: ['React', 'Supabase', 'Firebase', 'AI Integration'],
+        'A web-based portal built for students and instructors. Features include course progress tracking, interactive quizzes, video streaming, and an AI-driven chatbot that answers questions based on course handouts.',
+    technologies: ['React.js', 'Supabase', 'Tailwind CSS', 'OpenAI', 'Vite'],
     highlights: [
-      'Dashboard layout for scanning progress and learning activity',
-      'Authentication-ready product structure',
-      'AI-assisted features for learning support and clarity',
+      'Real-time student progress tracking using Supabase WebSockets',
+      'Responsive dark/light layout tailored for high readability',
+      'AI assistant integrated using vector embeddings for handout querying',
     ],
+    category: 'Web',
+    imagePath: 'assets/edunest_lms.png',
+    gitHubUrl: 'https://github.com/zaidautomates/edunest-lms',
+    liveUrl: 'https://supabase.com',
+  ),
+  PortfolioProject(
+    id: 'ecotrack_app',
+    icon: Icons.energy_savings_leaf_outlined,
+    title: 'EcoTrack - Carbon Footprint Tracker',
+    tech: 'Flutter / SQLite / FL Chart',
+    description:
+        'A mobile app empowering users to log activities, track carbon emissions, and set green habit reminders.',
+    details:
+        'EcoTrack makes environmental impact visible. Users can log daily transport, food consumption, and energy use. The app calculates their carbon footprint in real-time, displays progress charts, and suggests carbon-reducing challenges.',
+    technologies: ['Flutter', 'Dart', 'SQLite', 'FL Chart', 'Local Notifications'],
+    highlights: [
+      'Real-time visual graphs of emissions using customized FL Chart',
+      'Gamified green challenge cards with point tracking',
+      'Daily local notification triggers for eco-friendly reminders',
+    ],
+    category: 'Mobile',
+    imagePath: 'assets/ecotrack.png',
+    gitHubUrl: 'https://github.com/zaidautomates/ecotrack',
+  ),
+  PortfolioProject(
+    id: 'devconnect_web',
+    icon: Icons.connect_without_contact_outlined,
+    title: 'DevConnect - Developer Networking Platform',
+    tech: 'Next.js / Node.js / Socket.io / WebRTC',
+    description:
+        'A collaborative web workspace with real-time text chat, audio calls, and code sharing.',
+    details:
+        'DevConnect bridges the gap for remote dev teams. It combines a real-time Markdown editor, collaborative code execution blocks, a messaging center with channel divisions, and voice-room integration.',
+    technologies: ['Next.js', 'Socket.io', 'WebRTC', 'Express', 'MongoDB'],
+    highlights: [
+      'Real-time code editing synched using OT (Operational Transformation)',
+      'Low-latency voice calling powered by WebRTC peer mesh',
+      'Secure user accounts and encrypted direct messaging',
+    ],
+    category: 'Web',
+    imagePath: 'assets/devconnect.png',
+    gitHubUrl: 'https://github.com/zaidautomates/devconnect',
+  ),
+  PortfolioProject(
+    id: 'smarthome_iot',
+    icon: Icons.settings_remote_outlined,
+    title: 'SmartHome IoT Controller',
+    tech: 'Vue.js / MQTT / Highcharts / Tailwind',
+    description:
+        'An administrative panel showing sensor analytics, camera streams, and active appliance toggles.',
+    details:
+        'A dashboard designed for home automation. It fetches temperature, humidity, and power consumption from local IoT microcontrollers (ESP32) via MQTT, displaying real-time gauges, history charts, and camera feeds.',
+    technologies: ['Vue.js', 'MQTT / Mosquitto', 'Highcharts', 'Tailwind CSS', 'Node-RED'],
+    highlights: [
+      'Sub-second status updates via MQTT protocol integration',
+      'Interactive history charts showing appliance power usage over time',
+      'Custom automated scenes triggered by environmental thresholds',
+    ],
+    category: 'Dashboard',
+    imagePath: 'assets/smarthome.png',
+    gitHubUrl: 'https://github.com/zaidautomates/smarthome-iot',
   ),
 ];
 
@@ -238,7 +397,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  static const _validEmail = 'zaidautomates@gmail.com';
   static const _passwordSalt = 'codiora-portfolio-v2';
   static const _validPasswordHash = 3724395600;
 
@@ -283,8 +441,9 @@ class _LoginScreenState extends State<LoginScreen>
 
     final email = _emailController.text.trim().toLowerCase();
     final passwordHash = _hashPassword(_passwordController.text);
+    final validEmail = portfolioState.email.trim().toLowerCase();
 
-    if (email != _validEmail || passwordHash != _validPasswordHash) {
+    if (email != validEmail || passwordHash != _validPasswordHash) {
       setState(() => _authError = 'Invalid email or password.');
       return;
     }
@@ -371,7 +530,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   PremiumAvatar(size: avatarSize),
                                   SizedBox(height: compact ? 16 : 22),
                                   Text(
-                                    'Zaid Ali',
+                                    portfolioState.name,
                                     textAlign: TextAlign.center,
                                     style: Theme.of(
                                       context,
@@ -379,7 +538,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Flutter Developer | AI Automation Builder | Computer Science Student',
+                                    portfolioState.title,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: context.mutedText,
@@ -779,7 +938,7 @@ class PremiumHeroSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Zaid Ali',
+                        portfolioState.name,
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w900,
@@ -787,9 +946,9 @@ class PremiumHeroSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Flutter Developer | AI Automation Builder | Computer Science Student',
-                        style: TextStyle(
+                      Text(
+                        portfolioState.title,
+                        style: const TextStyle(
                           color: AppColors.cyan,
                           fontWeight: FontWeight.w700,
                           height: 1.35,
@@ -867,15 +1026,33 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionHeader(
-            title: 'About Me',
-            subtitle:
-                'A concise summary of my background, mindset, and the kind of work I enjoy.',
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: SectionHeader(
+                  title: 'About Me',
+                  subtitle:
+                      'A concise summary of my background, mindset, and the kind of work I enjoy.',
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, color: AppColors.purple),
+                tooltip: 'Edit Profile',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileEditScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           GlassCard(
             child: Text(
-              'I am Zaid Ali, a Computer Science student in my 6th semester at Abdul Wali Khan University Mardan. I build practical digital products with Flutter, Dart, and modern backend tools. My focus is clean UI, reliable functionality, and automation-driven solutions that improve speed, clarity, and delivery.',
+              portfolioState.bio,
               style: TextStyle(
                 height: 1.65,
                 color: context.softText,
@@ -920,6 +1097,238 @@ class ProfileScreen extends StatelessWidget {
           const SkillWrap(),
         ],
       ),
+    );
+  }
+}
+
+class ProfileEditScreen extends StatefulWidget {
+  const ProfileEditScreen({super.key});
+
+  @override
+  State<ProfileEditScreen> createState() => _ProfileEditScreenState();
+}
+
+class _ProfileEditScreenState extends State<ProfileEditScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _titleController;
+  late final TextEditingController _bioController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: portfolioState.name);
+    _titleController = TextEditingController(text: portfolioState.title);
+    _bioController = TextEditingController(text: portfolioState.bio);
+    _emailController = TextEditingController(text: portfolioState.email);
+    _phoneController = TextEditingController(text: portfolioState.phone);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _titleController.dispose();
+    _bioController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  void _save() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final name = _nameController.text.trim();
+      final title = _titleController.text.trim();
+      final bio = _bioController.text.trim();
+      final email = _emailController.text.trim();
+      final phone = _phoneController.text.trim();
+
+      await portfolioState.updateProfile(name: name, title: title, bio: bio);
+      await portfolioState.updateContact(email: email, phone: phone);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated successfully!'),
+            backgroundColor: AppColors.purple,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          const AppBackdrop(),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton.filledTonal(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.arrow_back),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Edit Profile',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    GlassCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTextField(
+                            controller: _nameController,
+                            label: 'Full Name',
+                            icon: Icons.person_outline,
+                            validator: (val) => val == null || val.trim().isEmpty ? 'Name is required' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _titleController,
+                            label: 'Professional Role',
+                            icon: Icons.work_outline,
+                            validator: (val) => val == null || val.trim().isEmpty ? 'Title is required' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _bioController,
+                            label: 'About / Bio',
+                            icon: Icons.info_outline,
+                            maxLines: 4,
+                            validator: (val) => val == null || val.trim().isEmpty ? 'Bio is required' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _emailController,
+                            label: 'Email',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (val) {
+                              if (val == null || val.trim().isEmpty) return 'Email is required';
+                              if (!val.contains('@') || !val.contains('.')) return 'Invalid email format';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _phoneController,
+                            label: 'Phone',
+                            icon: Icons.phone_outlined,
+                            keyboardType: TextInputType.phone,
+                            validator: (val) => val == null || val.trim().isEmpty ? 'Phone is required' : null,
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: BorderSide(color: context.cardBorder),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Cancel',
+                                    style: TextStyle(color: context.primaryText),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: FilledButton(
+                                  onPressed: _save,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.purple,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: const Text('Save Changes'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: context.softText,
+            fontWeight: FontWeight.w600,
+            fontSize: 14.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: validator,
+          style: TextStyle(color: context.primaryText),
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: AppColors.cyan),
+            filled: true,
+            fillColor: context.isDarkPortfolio
+                ? Colors.white.withValues(alpha: 0.04)
+                : Colors.black.withValues(alpha: 0.03),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: context.cardBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.cyan, width: 1.2),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1009,39 +1418,171 @@ class SkillWrap extends StatelessWidget {
   }
 }
 
-class ProjectsScreen extends StatelessWidget {
+class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
 
   @override
+  State<ProjectsScreen> createState() => _ProjectsScreenState();
+}
+
+class _ProjectsScreenState extends State<ProjectsScreen> {
+  String _selectedCategory = 'All';
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Generate categories dynamically
+    final categories = ['All', ...portfolioProjects.map((p) => p.category).toSet()];
+
+    // Apply combined filters
+    final query = _searchQuery.trim().toLowerCase();
+    final filteredProjects = portfolioProjects.where((project) {
+      final matchesCategory = _selectedCategory == 'All' || project.category == _selectedCategory;
+      final matchesSearch = query.isEmpty ||
+          project.title.toLowerCase().contains(query) ||
+          project.description.toLowerCase().contains(query) ||
+          project.category.toLowerCase().contains(query) ||
+          project.technologies.any((tech) => tech.toLowerCase().contains(query));
+      return matchesCategory && matchesSearch;
+    }).toList();
+
     return PortfolioPage(
       title: 'Projects',
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ProjectCard(
-            icon: Icons.phone_iphone,
-            title: 'Personal Portfolio Mobile App',
-            tech: 'Flutter / Dart / Material 3',
-            description:
-                'A mobile portfolio app with login flow, bottom navigation, profile, projects, contact details, and a modern premium UI.',
+          // Search Bar
+          GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            radius: 20,
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) {
+                setState(() {
+                  _searchQuery = val;
+                });
+              },
+              style: TextStyle(color: context.primaryText),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search, color: AppColors.cyan),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: AppColors.purple),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
+                hintText: 'Search title, tech, description...',
+                hintStyle: TextStyle(color: context.mutedText),
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+              ),
+            ),
           ),
-          SizedBox(height: 14),
-          ProjectCard(
-            icon: Icons.account_tree_outlined,
-            title: 'AI Automation Workflows',
-            tech: 'n8n / APIs / Google Workspace',
-            description:
-                'Automation workflows designed to reduce repetitive work, organize information, and improve productivity using AI tools.',
+          const SizedBox(height: 18),
+          
+          // Category Filtering Chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: categories.map((cat) {
+                final isSelected = _selectedCategory == cat;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(
+                      cat,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : context.primaryText,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() {
+                          _selectedCategory = cat;
+                        });
+                      }
+                    },
+                    selectedColor: AppColors.purple,
+                    backgroundColor: context.isDarkPortfolio
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.03),
+                    side: BorderSide(
+                      color: isSelected ? Colors.transparent : context.cardBorder,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-          SizedBox(height: 14),
-          ProjectCard(
-            icon: Icons.dashboard_customize_outlined,
-            title: 'EduNest LMS Dashboard',
-            tech: 'React / Supabase / AI Integration',
-            description:
-                'A learning management dashboard with authentication, progress views, and AI-assisted learning features.',
-          ),
+          const SizedBox(height: 20),
+          
+          // Project Listing or Empty State
+          if (filteredProjects.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.search_off_outlined,
+                      size: 72,
+                      color: AppColors.purple,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No Projects Found',
+                      style: TextStyle(
+                        color: context.primaryText,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Try adjusting your search query or category filter.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: context.mutedText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredProjects.length,
+              itemBuilder: (context, index) {
+                final project = filteredProjects[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: ProjectCard(project: project),
+                );
+              },
+            ),
         ],
       ),
     );
@@ -1067,33 +1608,34 @@ class ContactScreen extends StatelessWidget {
           SocialButtonGrid(
             links: socialLinks,
             onTap: (link) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Opening ${link.title}...')),
-              );
+              final url = link.subtitle.startsWith('http')
+                  ? link.subtitle
+                  : 'https://${link.subtitle}';
+              launchProjectUrl(context, url);
             },
           ),
           const SizedBox(height: 18),
           InfoCard(
             icon: Icons.email_outlined,
             title: 'Email',
-            subtitle: 'zaidautomates@gmail.com',
+            subtitle: portfolioState.email,
             onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Opening Email...')));
+              final emailUri = Uri.tryParse('mailto:${portfolioState.email}');
+              if (emailUri != null) {
+                launchUrl(emailUri);
+              }
             },
           ),
           const SizedBox(height: 12),
           InfoCard(
             icon: Icons.phone_outlined,
             title: 'Phone',
-            subtitle: 'Available upon request',
+            subtitle: portfolioState.phone,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Phone details available upon request.'),
-                ),
-              );
+              final phoneUri = Uri.tryParse('tel:${portfolioState.phone}');
+              if (phoneUri != null) {
+                launchUrl(phoneUri);
+              }
             },
           ),
           const SizedBox(height: 22),
@@ -1499,8 +2041,87 @@ class StatCard extends StatelessWidget {
   }
 }
 
+class LinkedInLogoWidget extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const LinkedInLogoWidget({super.key, required this.size, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Center(
+        child: Text(
+          'in',
+          style: TextStyle(
+            color: color,
+            fontSize: size * 0.82,
+            fontWeight: FontWeight.w900,
+            fontFamily: 'Inter',
+            height: 0.9,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GitHubLogoPainter extends CustomPainter {
+  final Color color;
+
+  GitHubLogoPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    final sx = size.width / 24.0;
+    final sy = size.height / 24.0;
+
+    // Start path at M12 0
+    path.moveTo(12 * sx, 0 * sy);
+    path.cubicTo(5.374 * sx, 0 * sy, 0 * sx, 5.373 * sy, 0 * sx, 12 * sy);
+    path.cubicTo(0 * sx, 17.302 * sy, 3.438 * sx, 21.8 * sy, 8.207 * sx, 23.387 * sy);
+    path.cubicTo(8.806 * sx, 23.498 * sy, 9.0 * sx, 23.126 * sy, 9.0 * sx, 22.81 * sy);
+    path.lineTo(9.0 * sx, 20.576 * sy);
+    path.cubicTo(5.662 * sx, 21.302 * sy, 4.967 * sx, 19.16 * sy, 4.967 * sx, 19.16 * sy);
+    path.cubicTo(4.421 * sx, 17.773 * sy, 3.634 * sx, 17.404 * sy, 3.634 * sx, 17.404 * sy);
+    path.cubicTo(2.545 * sx, 16.659 * sy, 3.717 * sx, 16.675 * sy, 3.717 * sx, 16.675 * sy);
+    path.cubicTo(4.922 * sx, 16.759 * sy, 5.556 * sx, 17.912 * sy, 5.556 * sx, 17.912 * sy);
+    path.cubicTo(6.666 * sx, 19.746 * sy, 8.363 * sx, 19.216 * sy, 9.048 * sx, 18.909 * sy);
+    path.cubicTo(9.155 * sx, 18.134 * sy, 9.466 * sx, 17.604 * sy, 9.81 * sx, 17.305 * sy);
+    path.cubicTo(7.145 * sx, 17.0 * sy, 4.343 * sx, 15.971 * sy, 4.343 * sx, 11.374 * sy);
+    path.cubicTo(4.343 * sx, 10.063 * sy, 4.812 * sx, 8.993 * sy, 5.579 * sx, 8.153 * sy);
+    path.cubicTo(5.455 * sx, 7.85 * sy, 5.044 * sx, 6.629 * sy, 5.696 * sx, 4.977 * sy);
+    path.cubicTo(5.696 * sx, 4.977 * sy, 6.704 * sx, 4.655 * sy, 8.997 * sx, 6.207 * sy);
+    path.cubicTo(9.954 * sx, 5.941 * sy, 10.98 * sx, 5.808 * sy, 12.0 * sx, 5.803 * sy);
+    path.cubicTo(13.02 * sx, 5.808 * sy, 14.047 * sx, 5.941 * sy, 15.006 * sx, 6.207 * sy);
+    path.cubicTo(17.297 * sx, 4.655 * sy, 18.303 * sx, 4.977 * sy, 18.303 * sx, 4.977 * sy);
+    path.cubicTo(18.956 * sx, 6.63 * sy, 18.545 * sx, 7.851 * sy, 18.421 * sx, 8.153 * sy);
+    path.cubicTo(19.191 * sx, 8.993 * sy, 19.656 * sx, 10.064 * sy, 19.656 * sx, 11.374 * sy);
+    path.cubicTo(19.656 * sx, 15.983 * sy, 16.849 * sx, 16.998 * sy, 14.177 * sx, 17.295 * sy);
+    path.cubicTo(14.607 * sx, 17.667 * sy, 15.0 * sx, 18.397 * sy, 15.0 * sx, 19.517 * sy);
+    path.lineTo(15.0 * sx, 22.81 * sy);
+    path.cubicTo(15.0 * sx, 23.129 * sy, 15.192 * sx, 23.504 * sy, 15.801 * sx, 23.386 * sy);
+    path.cubicTo(20.566 * sx, 21.797 * sy, 24.0 * sx, 17.3 * sy, 24.0 * sx, 12.0 * sy);
+    path.cubicTo(24.0 * sx, 5.373 * sy, 18.627 * sx, 0 * sy, 12.0 * sx, 0 * sy);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class PremiumIconBadge extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? customIcon;
   final double size;
   final Color accent;
   final Color? secondAccent;
@@ -1508,7 +2129,8 @@ class PremiumIconBadge extends StatelessWidget {
 
   const PremiumIconBadge({
     super.key,
-    required this.icon,
+    this.icon,
+    this.customIcon,
     this.size = 48,
     this.accent = AppColors.cyan,
     this.secondAccent,
@@ -1565,11 +2187,11 @@ class PremiumIconBadge extends StatelessWidget {
             ),
           ),
           Center(
-            child: Icon(
+            child: customIcon ?? (icon != null ? Icon(
               icon,
               color: context.isDarkPortfolio ? Colors.white : accent,
               size: size * 0.48,
-            ),
+            ) : const SizedBox.shrink()),
           ),
         ],
       ),
@@ -1879,130 +2501,85 @@ class SocialButtonGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final narrow = constraints.maxWidth < 430;
-        final children = links
-            .map(
-              (link) => narrow
-                  ? SocialActionButton(link: link, onTap: () => onTap(link))
-                  : Expanded(
-                      child: SocialActionButton(
-                        link: link,
-                        onTap: () => onTap(link),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: links.map((link) {
+        final brandColor = link.title == 'LinkedIn'
+            ? const Color(0xFF0A66C2)
+            : link.title == 'GitHub'
+                ? (context.isDarkPortfolio ? Colors.white : const Color(0xFF24292E))
+                : AppColors.cyan;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Tooltip(
+            message: link.title,
+            child: AnimatedCard(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                  child: InkWell(
+                    onTap: () => onTap(link),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: 76,
+                      height: 76,
+                      decoration: BoxDecoration(
+                        color: context.cardFill,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: context.cardBorder),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: context.isDarkPortfolio ? 0.22 : 0.06,
+                            ),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: PremiumIconBadge(
+                          icon: link.icon,
+                          customIcon: link.title == 'LinkedIn'
+                              ? LinkedInLogoWidget(
+                                  size: 23,
+                                  color: context.isDarkPortfolio ? Colors.white : brandColor,
+                                )
+                              : link.title == 'GitHub'
+                                  ? CustomPaint(
+                                      size: const Size(22, 22),
+                                      painter: GitHubLogoPainter(
+                                        color: context.isDarkPortfolio ? Colors.white : brandColor,
+                                      ),
+                                    )
+                                  : null,
+                          size: 48,
+                          accent: brandColor,
+                          secondAccent: AppColors.purple,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     ),
-            )
-            .toList();
-
-        if (narrow) {
-          return Column(
-            children: [
-              for (final child in children) ...[
-                child,
-                const SizedBox(height: 10),
-              ],
-            ],
-          );
-        }
-
-        return Row(
-          children: [
-            children[0],
-            const SizedBox(width: 10),
-            children[1],
-            const SizedBox(width: 10),
-            children[2],
-          ],
-        );
-      },
-    );
-  }
-}
-
-class SocialActionButton extends StatelessWidget {
-  final SocialLink link;
-  final VoidCallback onTap;
-
-  const SocialActionButton({
-    super.key,
-    required this.link,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedCard(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
-        child: GlassCard(
-          padding: const EdgeInsets.all(14),
-          radius: 22,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PremiumIconBadge(
-                icon: link.icon,
-                size: 44,
-                accent: AppColors.cyan,
-                secondAccent: AppColors.gold,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                link.title,
-                style: TextStyle(
-                  color: context.primaryText,
-                  fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                link.subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: context.mutedText, fontSize: 12),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      }).toList(),
     );
   }
 }
 
 class ProjectCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String tech;
-  final String description;
+  final PortfolioProject project;
 
   const ProjectCard({
     super.key,
-    required this.icon,
-    required this.title,
-    required this.tech,
-    required this.description,
+    required this.project,
   });
-
-  PortfolioProject get project => PortfolioProject(
-    icon: icon,
-    title: title,
-    tech: tech,
-    description: description,
-    details:
-        '$description This project focuses on practical implementation, clear structure, and a polished user experience for portfolio review.',
-    technologies: tech
-        .split(RegExp(r'\s*/\s*'))
-        .where((item) => item.trim().isNotEmpty)
-        .map((item) => item.trim())
-        .toList(),
-    highlights: const [
-      'Modern responsive interface with premium cards',
-      'Clear navigation and user-friendly content structure',
-      'Project-ready architecture for future expansion',
-    ],
-  );
 
   void _openDetails(BuildContext context) {
     Navigator.of(context).push(
@@ -2036,66 +2613,154 @@ class ProjectCard extends StatelessWidget {
         onTap: () => _openDetails(context),
         borderRadius: BorderRadius.circular(24),
         child: GlassCard(
+          padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              // Cover image with a glassmorphic floating category badge
+              Stack(
                 children: [
-                  PremiumIconBadge(
-                    icon: icon,
-                    size: 52,
-                    accent: AppColors.purple,
-                    secondAccent: AppColors.cyan,
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    child: SizedBox(
+                      height: 160,
+                      width: double.infinity,
+                      child: Image.asset(
+                        project.imagePath,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.purple.withValues(alpha: 0.8),
+                                  AppColors.cyan.withValues(alpha: 0.8)
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                project.icon,
+                                size: 52,
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 17.5,
-                            fontWeight: FontWeight.w800,
-                            color: context.primaryText,
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: Text(
+                            project.category,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11.5,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          tech,
-                          style: const TextStyle(
-                            color: AppColors.cyan,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+              // Text Content
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        PremiumIconBadge(
+                          icon: project.icon,
+                          size: 38,
+                          accent: AppColors.purple,
+                          secondAccent: AppColors.cyan,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                project.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 16.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: context.primaryText,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                project.tech,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: AppColors.cyan,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  Icon(Icons.chevron_right, color: context.mutedText),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                description,
-                style: TextStyle(color: context.softText, height: 1.55),
-              ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton.icon(
-                  onPressed: () => _openDetails(context),
-                  icon: const Icon(Icons.open_in_new, size: 18),
-                  label: const Text('View Project'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: context.primaryText,
-                    side: BorderSide(
-                      color: AppColors.gold.withValues(alpha: 0.55),
+                    const SizedBox(height: 12),
+                    Text(
+                      project.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: context.softText,
+                        fontSize: 13.5,
+                        height: 1.48,
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    const SizedBox(height: 14),
+                    OutlinedButton.icon(
+                      onPressed: () => _openDetails(context),
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      label: const Text(
+                        'View Project',
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: context.primaryText,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        side: BorderSide(
+                          color: AppColors.gold.withValues(alpha: 0.6),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
@@ -2117,7 +2782,7 @@ class ThemeToggleButton extends StatelessWidget {
       message: isDark ? 'Switch to light mode' : 'Switch to dark mode',
       child: InkWell(
         onTap: () {
-          themeController.value = isDark ? ThemeMode.light : ThemeMode.dark;
+          portfolioState.updateTheme(isDark ? ThemeMode.light : ThemeMode.dark);
         },
         borderRadius: BorderRadius.circular(18),
         child: AnimatedContainer(
@@ -2136,6 +2801,36 @@ class ThemeToggleButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> launchProjectUrl(BuildContext context, String? url) async {
+  if (url == null || url.trim().isEmpty) return;
+  final uri = Uri.tryParse(url.trim());
+  if (uri != null) {
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not open link: $url')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error opening link: $e')),
+        );
+      }
+    }
+  } else {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid link format')),
+      );
+    }
   }
 }
 
@@ -2174,17 +2869,83 @@ class ProjectDetailScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 18),
+                  
+                  // Project Image / Banner
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: SizedBox(
+                      height: 200,
+                      width: double.infinity,
+                      child: Image.asset(
+                        project.imagePath,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Beautiful fallback container
+                          return Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [AppColors.purple.withValues(alpha: 0.8), AppColors.cyan.withValues(alpha: 0.8)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(project.icon, size: 64, color: Colors.white),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    project.category.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 16,
+                                      letterSpacing: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  
                   GlassCard(
                     radius: 30,
                     padding: const EdgeInsets.all(22),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        PremiumIconBadge(
-                          icon: project.icon,
-                          size: 64,
-                          accent: AppColors.purple,
-                          secondAccent: AppColors.gold,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            PremiumIconBadge(
+                              icon: project.icon,
+                              size: 58,
+                              accent: AppColors.purple,
+                              secondAccent: AppColors.gold,
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: AppColors.cyan.withValues(alpha: 0.15),
+                                border: Border.all(color: AppColors.cyan.withValues(alpha: 0.3)),
+                              ),
+                              child: Text(
+                                project.category,
+                                style: const TextStyle(
+                                  color: AppColors.cyan,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -2212,6 +2973,54 @@ class ProjectDetailScreen extends StatelessWidget {
                             fontSize: 15,
                           ),
                         ),
+                        
+                        // GitHub / Live Demo Buttons
+                        if ((project.gitHubUrl != null && project.gitHubUrl!.trim().isNotEmpty) || 
+                            (project.liveUrl != null && project.liveUrl!.trim().isNotEmpty)) ...[
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              if (project.gitHubUrl != null && project.gitHubUrl!.trim().isNotEmpty)
+                                Expanded(
+                                  child: FilledButton.icon(
+                                    onPressed: () => launchProjectUrl(context, project.gitHubUrl),
+                                    icon: CustomPaint(
+                                      size: const Size(20, 20),
+                                      painter: GitHubLogoPainter(color: Colors.white),
+                                    ),
+                                    label: const Text('GitHub Repo'),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: AppColors.purple,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              if (project.gitHubUrl != null && project.liveUrl != null && 
+                                  project.gitHubUrl!.trim().isNotEmpty && project.liveUrl!.trim().isNotEmpty)
+                                const SizedBox(width: 12),
+                              if (project.liveUrl != null && project.liveUrl!.trim().isNotEmpty)
+                                Expanded(
+                                  child: FilledButton.icon(
+                                    onPressed: () => launchProjectUrl(context, project.liveUrl),
+                                    icon: const Icon(Icons.language),
+                                    label: const Text('Live Demo'),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: AppColors.gold,
+                                      foregroundColor: Colors.black,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -2275,6 +3084,9 @@ class SkillProgressCard extends StatelessWidget {
               children: [
                 PremiumIconBadge(
                   icon: skill.icon,
+                  customIcon: skill.name == 'Flutter'
+                      ? const FlutterLogo(size: 18)
+                      : null,
                   size: 44,
                   accent: AppColors.cyan,
                   secondAccent: AppColors.purple,

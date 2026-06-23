@@ -48,6 +48,8 @@ void main() {
 
     expect(find.text('Personal Portfolio Mobile App'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('View Project').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('View Project').first);
     await tester.pumpAndSettle();
 

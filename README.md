@@ -1,320 +1,108 @@
-# Zaid Portfolio App
+# Zaid Portfolio App — V3 Interactive
 
-A premium personal portfolio mobile application built with Flutter and Dart for the Codiora Remote Internship Program — Week 1 Mobile App Development Task.
+A premium, interactive personal portfolio mobile application built with Flutter and Dart for the **Codiora Remote Internship Program — Weeks 1 to 3 Mobile App Development Tasks**.
 
 ---
 
 ## 📱 Project Overview
 
-This project is a mobile application version of a personal portfolio. Instead of presenting portfolio information through a website, this app allows users to explore professional details, skills, experience, projects, and contact information through a modern, responsive, and user-friendly mobile interface.
+This mobile application acts as a professional digital portfolio, enabling users to explore career details, educational history, technical skill progressions, and featured projects. 
 
-The application was developed using Flutter and follows modern mobile UI/UX principles, including smooth navigation, clean screen organization, premium visual design, and responsive layouts.
+Over three weeks, the app evolved from a static single-screen display into a highly interactive, custom-state-managed full-portfolio tool with local preferences persistence, category filtering, search features, profile editing screens, dynamic external links, and custom brand graphics.
 
 ---
 
-## ✨ Features
+## ✨ Features Progressions
 
-### 🔐 Login Screen
+### 𝑾𝒆𝒆𝒌 1: Foundation
+*   **🔐 Login Screen:** Entry validation interface matching credentials.
+*   **🏠 Home Screen:** Intro cards, quick statistics, and navigation shortcuts.
+*   **👤 Profile Screen:** Basic information, educational background, and technical stack details.
+*   **💼 Projects Screen:** Listing of showcase projects.
+*   **📞 Contact Screen:** Support links, professional location cards, and connect triggers.
 
-* Professional login interface
-* Email and password fields
-* Smooth navigation to the portfolio dashboard
-* Clean and modern design
+### 𝑾𝒆𝒆𝒌 2: Navigation & Theming
+*   **📱 Bottom Navigation:** Glassmorphic persistent bottom bar preserving tab states.
+*   **💼 Project Details Screen:** Detailed popup transition displaying project summaries.
+*   **📊 Animated Skill Sliders:** Skills list with percentage progress bars and curved animations.
+*   **🎨 Light & Dark Theme Support:** Dual theme schemes with contrast handling.
+*   **🔗 Social links:** LinkedIn, GitHub, Email, and website routing.
 
-### 🏠 Home Screen
-
-* Welcome section
-* Professional introduction
-* Personal branding section
-* Quick statistics overview
-* Navigation shortcuts
-
-### 👤 Profile Screen
-
-* Personal information
-* Educational background
-* Technical skills
-* Professional focus areas
-* Experience section
-* Technology stack overview
-
-### 💼 Projects Screen
-
-* Portfolio project showcase
-* Project descriptions
-* Technology stack information
-* Professional project cards
-* Interactive project actions
-
-### 📞 Contact Screen
-
-* Email information
-* Phone information
-* GitHub profile
-* LinkedIn profile
-* Contact cards
-* Professional call-to-action section
-
-### 🎨 UI & UX
-
-* Premium dark theme
-* Glassmorphism-inspired cards
-* Modern typography
-* Smooth animations
-* Responsive layouts
-* Consistent design system
-* Material 3 components
+### 𝑾𝒆𝒆𝒌 3: Interactive & Visual Upgrades
+*   **🎨 Premium UI Card Redesign:** Re-engineered the project listing cards to feature a top cover image, a floating glassmorphic category badge, and an outlined "View Project" action button.
+*   **🖼️ High-Fidelity Mockup Assets:** Generated 6 professional project mockup and diagram illustrations using AI image generation, saving them in the `assets/` folder to serve as the real graphics for the listing and details pages.
+*   **🛡️ Official Brand Logo Badges:** Replaced generic placeholder icons with custom-drawn, official brand logo graphics for **LinkedIn** (custom Inter-font typography widget), **GitHub** (scalable vector path `CustomPainter`), and **Flutter** (framework logo badge widget).
+*   **🗂️ Dynamic Category Filters & Search:** Implemented choice chip tabs generated dynamically from the active project list (All, Mobile, Web, AI/ML, Dashboard) working concurrently with a case-insensitive search bar.
+*   **🔗 Dynamic External Links:** Integrated external links (GitHub Repo and Live Demo buttons) that resolve safely and launch external native browser/app targets.
+*   **✍️ Profile Editing Panel:** Custom scrollable editing form (validation checks on fields and email formatting) to edit Full Name, Role, Bio, Email, and Phone.
+*   **💾 Storage Persistence:** Connected the app state to SharedPreferences to remember your edited profile details and dark/light mode preference across restarts.
+*   **⚡ Performance & Build Optimizations:** Centralized state in a lightweight `ChangeNotifier` and optimized Android packaging to bypass space-path bugs and Kotlin cross-drive compiler caching issues.
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend
-
-* Flutter
-* Dart
-
-### UI Framework
-
-* Material Design 3
-
-### Development Tools
-
-* Android Studio
-* Visual Studio Code
-* Flutter SDK
-* Git
-* GitHub
+*   **Frontend:** Flutter & Dart
+*   **State Management:** `ChangeNotifier` & `AnimatedBuilder` (Lightweight, zero-overhead reactive state)
+*   **Local Storage:** `shared_preferences`
+*   **Routings & Utilities:** `url_launcher`
+*   **Vector Drawing:** `CustomPainter` & custom path Beziers
+*   **Theme Engine:** Material 3 Dark/Light configurations
 
 ---
 
-## 📂 Application Screens
+## 📂 Project Structure
 
-### 1. Login Screen
-
-Provides a professional authentication interface for entering the application.
-
-### 2. Home Screen
-
-Displays a welcome section, quick introduction, and portfolio overview.
-
-### 3. Profile Screen
-
-Contains personal information, education, skills, experience, and career focus.
-
-### 4. Projects Screen
-
-Showcases portfolio projects with descriptions and technology stacks.
-
-### 5. Contact Screen
-
-Provides contact information and professional social profiles.
-
----
-
-## 🎯 Internship Task Requirements Coverage
-
-| Requirement                   | Status      |
-| ----------------------------- | ----------- |
-| Login Screen                  | ✅ Completed |
-| User Authentication Interface | ✅ Completed |
-| Home Screen                   | ✅ Completed |
-| Welcome Section               | ✅ Completed |
-| Quick Introduction            | ✅ Completed |
-| Profile Screen                | ✅ Completed |
-| Personal Details              | ✅ Completed |
-| Skills Section                | ✅ Completed |
-| Experience Section            | ✅ Completed |
-| Projects Screen               | ✅ Completed |
-| Project List                  | ✅ Completed |
-| Project Descriptions          | ✅ Completed |
-| Contact Screen                | ✅ Completed |
-| Email Information             | ✅ Completed |
-| Phone Information             | ✅ Completed |
-| Social Links                  | ✅ Completed |
-| Mobile UI Design              | ✅ Completed |
-| Navigation                    | ✅ Completed |
-| Screen Organization           | ✅ Completed |
-| User Experience               | ✅ Completed |
-| App Structure                 | ✅ Completed |
-
----
-
-## 💼 Featured Projects
-
-### Portfolio Mobile Application
-
-**Tech Stack:** Flutter, Dart, Material 3
-
-A modern personal portfolio mobile application featuring profile management, project showcase, skills presentation, and professional contact information.
-
-### AI Automation Workflows
-
-**Tech Stack:** n8n, APIs, AI Tools
-
-Automation systems designed to streamline repetitive workflows and improve productivity using modern AI-powered solutions.
-
-### EduNest LMS Dashboard
-
-**Tech Stack:** React, Supabase, AI Integration
-
-A Learning Management System dashboard designed for managing student learning experiences, progress tracking, and educational content.
-
----
-
-## 👨‍💻 Developer Information
-
-### Zaid Ali
-
-Flutter Developer | AI Automation Builder | Computer Science Student
-
-#### Education
-
-Bachelor of Computer Science (BSCS)
-
-Abdul Wali Khan University Mardan
-
-6th Semester
-
-#### Focus Areas
-
-* Flutter Development
-* Mobile App Development
-* AI Automation
-* Machine Learning
-* Python Development
-* n8n Workflows
-* React Applications
-* Supabase
-* Firebase
-* REST APIs
-* UI/UX Design
-* Git & GitHub
-
----
-
-## 📬 Contact Information
-
-**Email:** [zaidautomates@gmail.com](mailto:zaidautomates@gmail.com)
-
-**GitHub:** https://github.com/zaidautomates
-
-**LinkedIn:** https://linkedin.com/in/zaidautomates
-
-**Phone:** Available upon request
+```text
+zaid_portfolio_app/
+│
+├── android/            ← Configured for NDK debug builds with custom spacing-path corrections
+├── assets/
+│   ├── Profile.jpeg            ← Profile photo
+│   ├── personal_portfolio.png  ← Mockup for Portfolio app
+│   ├── ai_workflows.png        ← Mockup for AI Automation
+│   ├── edunest_lms.png         ← Mockup for LMS Dashboard
+│   ├── ecotrack.png            ← Mockup for Carbon Tracker
+│   ├── devconnect.png          ← Mockup for Collaborative workspace
+│   └── smarthome.png           ← Mockup for IoT Smart Home
+│
+├── lib/
+│   └── main.dart       ← Contains App State, Model definitions, navigation flow, and all UI screens
+│
+├── pubspec.yaml        ← Dependency mapping (shared_preferences, url_launcher)
+└── README.md
+```
 
 ---
 
 ## 🚀 Installation & Setup
 
-### Clone Repository
-
-```bash
-git clone https://github.com/zaidautomates/zaid-portfolio-app.git
-```
-
-### Navigate to Project Directory
-
-```bash
-cd zaid-portfolio-app
-```
-
-### Install Dependencies
-
-```bash
-flutter pub get
-```
-
-### Run Application
-
-```bash
-flutter run
-```
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/zaidautomates/zaid-portfolio-app.git
+    cd zaid-portfolio-app
+    ```
+2.  **Verify configuration targets:**
+    If building on Windows without OS developer/symlink mode enabled, disable the Windows desktop platform first:
+    ```bash
+    flutter config --no-enable-windows-desktop
+    ```
+3.  **Install dependencies:**
+    ```bash
+    flutter pub get
+    ```
+4.  **Run on Android emulator:**
+    ```bash
+    flutter devices
+    ```
+    ```bash
+    flutter run
+    ```
 
 ---
 
-## 📱 Running on Android Emulator
+## 👨‍💻 Developer Information
 
-List available devices:
-
-```bash
-flutter devices
-```
-
-Run on emulator:
-
-```bash
-flutter run -d emulator-5554
-```
-
----
-
-## 📁 Project Structure
-
-```text
-zaid_portfolio_app/
-│
-├── android/
-├── ios/
-├── linux/
-├── macos/
-├── web/
-├── windows/
-│
-├── assets/
-│   └── Profile.jpeg
-│
-├── lib/
-│   └── main.dart
-│
-├── test/
-│
-├── pubspec.yaml
-├── pubspec.lock
-├── analysis_options.yaml
-├── README.md
-└── .gitignore
-```
-
----
-
-## 🎨 Design Highlights
-
-* Premium Dark Theme
-* Purple Accent Colors
-* Cyan Accent Elements
-* Glassmorphism Cards
-* Smooth UI Animations
-* Responsive Mobile Layout
-* Professional Portfolio Branding
-* Modern Navigation Experience
-
----
-
-## 📌 Project Status
-
-✅ Project Completed
-
-✅ Internship Task Completed
-
-✅ GitHub Ready
-
-✅ Portfolio Ready
-
-✅ Mobile UI Implemented
-
-✅ Responsive Layout Implemented
-
----
-
-## 🙏 Acknowledgements
-
-This project was developed as part of the Codiora Remote Internship Program under the Mobile App Development track. The application demonstrates Flutter development fundamentals, mobile UI/UX design principles, screen navigation, and professional portfolio presentation.
-
----
-
-## 📄 License
-
-This project is intended for educational, portfolio, internship, and learning purposes.
-
-© 2026 Zaid Ali. All Rights Reserved.
+*   **Zaid Ali** — Computer Science Student (Abdul Wali Khan University Mardan)
+*   **GitHub:** [zaidautomates](https://github.com/zaidautomates)
+*   **LinkedIn:** [zaidautomates](https://linkedin.com/in/zaidautomates)
