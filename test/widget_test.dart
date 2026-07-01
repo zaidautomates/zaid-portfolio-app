@@ -15,6 +15,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const ZaidPortfolioApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
 
     expect(find.text('Enter Portfolio'), findsOneWidget);
 
